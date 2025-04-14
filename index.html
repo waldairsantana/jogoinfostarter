@@ -56,6 +56,32 @@
       display: none;
       z-index: 20;
     }
+    #controls {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  display: flex;
+  gap: 20px;
+}
+
+#controls button {
+  background: #ffffffcc;
+  border: 2px solid #2e7d32;
+  color: #2e7d32;
+  padding: 15px 20px;
+  font-size: 24px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  box-shadow: 2px 2px 5px #aaa;
+  transition: background 0.3s;
+}
+
+#controls button:hover {
+  background: #a5d6a7;
+}
   </style>
 </head>
 <body>
@@ -64,7 +90,11 @@
     <div class="scoreboard" id="scoreboard">Pontuação: 10</div>
     <div id="game-over">Fim de Jogo!</div>
   </div>
-
+  <div id="controls">
+    <button onclick="moveAluno('left')">⬅️</button>
+    <button onclick="jump()">⬆️</button>
+    <button onclick="moveAluno('right')">➡️</button>
+  </div>
   <script>
     const game = document.getElementById("game");
     const aluno = document.getElementById("aluno");
