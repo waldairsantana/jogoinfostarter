@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Corrida do Aluno</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #c8e6c9; font-family: sans-serif; overflow: hidden; }
+    #game {
+      position: relative;
+  width: 100vw;
+  height: 100vh;
+  background: url('fundo.png') no-repeat center center;
+  background-size: cover;
+  overflow: hidden;
+    }
+    .aluno {
+      position: absolute;
+      bottom: 20px;
+      left: 50px;
+      width: 350px;
+      height: 350px;
+      background-image: url('aluno.png');
+      background-size: cover;
+      z-index: 10;
+      transition: bottom 0.2s, left 0.2s;
+    }
+    .obstacle, .item {
+      position: absolute;
+      bottom: 30px;
+      width: 80px;
+      height: 80px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      z-index: 5;
+    }
+    .scoreboard {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(255, 255, 255, 0.7);
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 18px;
+      color: #2e7d32;
+      z-index: 15;
+    }
+    #game-over {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 36px;
+      color: red;
+      display: none;
+      z-index: 20;
+    }
+  </style>
+</head>
+<body>
+  <div id="game">
+    <div class="aluno" id="aluno"></div>
+    <div class="scoreboard" id="scoreboard">Pontuação: 10</div>
+    <div id="game-over">Fim de Jogo!</div>
+  </div>
+
+  <script>
+    const game = document.getElementById("game");
+    const aluno = document.getElementById("aluno");
+    const scoreboard = document.getElementById("scoreboard");
+    const gameOverMessage = document.getElementById("game-over");
+
+    let score = 10;
+    let jumping = false;
+    let alunoLeft = 50;
+
+    function updateScore(value) {
+      score += value;
+      scoreboard.textContent = `Pontuação: ${score}`;
+
+      if (score <= 0) {
+        gameOverMessage.textContent = "Fim de Jogo!";
+        gameOverMessage.style.display = "block";
+        clearInterval(spawnInterval);
+        clearInterval(moveInterval);
+      } else if (score >= 100) {
+        gameOverMessage.textContent = "Você venceu!";
+        gameOverMessage.style.display = "block";
+        clearInterval(spawnInterval);
+        clearInterval(moveInterval);
+      }
+    }
+
+    function jump() {
+      if (jumping) return;
+      jumping = true;
+      aluno.style.bottom = "120px";
+      setTimeout(() => {
+        aluno.style.bottom = "0px";
+        jumping = false;
+      }, 500);
+    }
+
+    function moveAluno(direction) {
+      if (direction === "right") alunoLeft += 20;
+      if (direction === "left") alunoLeft -= 20;
+      alunoLeft = Math.max(0, Math.min(window.innerWidth - 150, alunoLeft));
+      aluno.style.left = alunoLeft + "px";
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowUp") jump();
+      if (e.key === "ArrowRight") moveAluno("right");
+      if (e.key === "ArrowLeft") moveAluno("left");
+    });
+
+    function spawnElement(type) {
+      const el = document.createElement("div");
+      el.classList.add(type === "obstacle" ? "obstacle" : "item");
+      el.style.left = window.innerWidth + "px";
+      el.style.backgroundImage = type === "obstacle"
+        ? `url(${["pedra.png", "fogo.png", "agua.png"][Math.floor(Math.random() * 3)]})`
+        : `url(${["excel.png", "power.png", "word.png"][Math.floor(Math.random() * 3)]})`;
+
+      game.appendChild(el);
+
+      const move = setInterval(() => {
+        const elLeft = parseInt(el.style.left);
+        if (elLeft < -50) {
+          clearInterval(move);
+          game.removeChild(el);
+        } else {
+          el.style.left = (elLeft - 10) + "px";
+
+          const alunoRect = aluno.getBoundingClientRect();
+          const elRect = el.getBoundingClientRect();
+
+          if (
+            alunoRect.left < elRect.right &&
+            alunoRect.right > elRect.left &&
+            alunoRect.bottom > elRect.top + 10 &&
+            alunoRect.top < elRect.bottom
+          ) {
+            clearInterval(move);
+            game.removeChild(el);
+            updateScore(type === "obstacle" ? -1 : +1);
+          }
+        }
+      }, 30);
+    }
+
+    const spawnInterval = setInterval(() => {
+      spawnElement(Math.random() < 0.7 ? "obstacle" : "item");
+    }, 1500);
+
+    const moveInterval = setInterval(() => {
+      // placeholder for additional game mechanics if needed
+    }, 100);
+  </script>
+</body>
+</html>
